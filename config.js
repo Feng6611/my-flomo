@@ -1,31 +1,25 @@
-// config.js
-// 全局配置文件
-// minDate: 仅显示该日期之后（含该日期）的 memo
-// tagListOrder: "asc" 表示正向排序（计数从低到高），"desc" 表示反向排序（计数从高到低）
-// tagFilterMode: "include" 表示正选（只显示包含该 tag 的 memo），"exclude" 表示反选（过滤出不包含该 tag 的 memo）
+// config.js - 全局配置
 var filterConfig = {
-    minDate: "2024-01-01",
-    tagListOrder: "desc",
-    tagFilterMode: "include",
-    defaultTagFilter: "",
-    
-    // 笔记文件链接地址，通过配置管理链接
-    notesFileUrl: "flomo/Chen的笔记.html",
-    
-    // 网站图标配置
-    icons: {
-        favicon: "assets/images/icon.png",  // 网站图标
-        size: "180x180"  // 图标尺寸
+    // 基础配置
+    minDate:"2024-01-01",         // 仅显示该日期之后的memo
+    tagListOrder:"desc",          // 标签排序：asc(从低到高)、desc(从高到低)
+    tagFilterMode:"include",      // 标签筛选：include(包含)、exclude(排除)
+    defaultTagFilter:"",          // 默认标签筛选
+    notesFileUrl:"flomo/Chen的笔记.html",
+
+    // 图标配置
+    icons:{
+        favicon:"assets/images/icon.png",
+        size:"180x180"
     },
-    
-    // SEO相关配置项
-    seo: {
-        title: "Open your flomo",
-        description: "思想是可以被公开的 - 让知识和想法自由流动",
-        keywords: "flomo,笔记,公开,想法,知识管理,笔记分享,个人知识库,思维导图,标签管理,数字花园,第二大脑,知识整理,学习笔记,灵感收集",
-        canonicalUrl: "openflomo.kkuk.dev" // 请根据实际情况替换为正确域名
+
+    // SEO配置
+    seo:{
+        title:"Open your flomo",
+        description:"思想是可以被公开的 - 让知识和想法自由流动",
+        keywords:"flomo,笔记,公开,想法,知识管理,笔记分享,个人知识库,思维导图,标签管理,数字花园,第二大脑,知识整理,学习笔记,灵感收集",
+        canonicalUrl:"openflomo.kkuk.dev"
     },
-    
-    // 添加版本控制
-    version: new Date().getTime() // 使用时间戳作为版本号，确保每次部署都会更新
+
+    version:new Date().getTime()  // 版本控制，使用时间戳
 }; 
