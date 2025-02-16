@@ -541,6 +541,21 @@ function processHtmlDocument(doc) {
     // 9. 初始化分页显示，使用HTML字符串而不是DOM元素
     filteredMemos = allMemos.map(memo => memo.html);
     renderPageOptimized(1, true);
+
+    // 新增：更新用户信息逻辑
+    const userContainer = doc.querySelector('.user');
+    if (userContainer) {
+        const nameElem = userContainer.querySelector('.name');
+        const dateElem = userContainer.querySelector('.date');
+        const name = nameElem ? nameElem.innerText : "";
+        const date = dateElem ? dateElem.innerText : "";
+        document.querySelectorAll('.user').forEach(container => {
+            const targetName = container.querySelector('.name');
+            const targetDate = container.querySelector('.date');
+            if (targetName) targetName.innerText = name;
+            if (targetDate) targetDate.innerText = date;
+        });
+    }
 }
 
 // 修改刷新功能，添加强制刷新参数

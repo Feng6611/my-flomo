@@ -118,36 +118,5 @@
             </div>
         </main>
     </div>
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // 从配置文件获取笔记文件路径
-      fetch(filterConfig.notesFileUrl)
-        .then(response => response.text())
-        .then(htmlText => {
-          // 利用 DOMParser 将返回的 HTML 文本转换为 DOM 对象
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(htmlText, 'text/html');
-          const userContainer = doc.querySelector('.user');
-          if (userContainer) {
-            const name = userContainer.querySelector('.name') ? userContainer.querySelector('.name').innerText : '';
-            const date = userContainer.querySelector('.date') ? userContainer.querySelector('.date').innerText : '';
-            // 更新当前页面中所有 .user 容器
-            document.querySelectorAll('.user').forEach(function(container) {
-              const nameElem = container.querySelector('.name');
-              const dateElem = container.querySelector('.date');
-              if (nameElem) {
-                nameElem.innerText = name;
-              }
-              if (dateElem) {
-                dateElem.innerText = date;
-              }
-            });
-          } else {
-            console.error('在 ' + filterConfig.notesFileUrl + ' 中未找到 .user 元素');
-          }
-        })
-        .catch(error => console.error('加载 ' + filterConfig.notesFileUrl + ' 错误:', error));
-    });
-    </script>
 </body>
 </html> 
