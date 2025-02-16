@@ -8,6 +8,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- 预加载关键 CSS -->
+    <link rel="preload" href="styles.css" as="style">
+    <!-- 预加载配置文件 -->
+    <link rel="preload" href="config.js" as="script">
+    
+    <!-- 对非关键 JavaScript 使用 defer -->
+    <script defer src="main.js"></script>
 </head>
 <body>
     <header>
