@@ -60,15 +60,9 @@
         <link rel="stylesheet" href="styles.css?v=${filterConfig.version}">
     </noscript>
     
-    <!-- 预加载配置文件 -->
+    <!-- 预加载并加载配置文件 -->
     <link rel="preload" href="config.js" as="script">
-    
-    <!-- 添加loadCSS polyfill -->
-    <script>
-        // loadCSS polyfill
-        /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
-        !function(w){"use strict";var loadCSS=function(href,before,media){var doc=w.document;var ss=doc.createElement("link");var ref;if(before){ref=before}else{var refs=(doc.body||doc.getElementsByTagName("head")[0]).childNodes;ref=refs[refs.length-1]}var sheets=doc.styleSheets;ss.rel="stylesheet";ss.href=href;ss.media="only x";function ready(cb){if(doc.body){return cb()}setTimeout(function(){ready(cb)})}ready(function(){ref.parentNode.insertBefore(ss,before?ref:ref.nextSibling)});var onloadcssdefined=function(cb){var resolvedHref=ss.href;var i=sheets.length;while(i--){if(sheets[i].href===resolvedHref){return cb()}}setTimeout(function(){onloadcssdefined(cb)})};function loadCB(){if(ss.addEventListener){ss.removeEventListener("load",loadCB)}ss.media=media||"all"}if(ss.addEventListener){ss.addEventListener("load",loadCB)}ss.onloadcssdefined=onloadcssdefined;onloadcssdefined(loadCB);return ss};if(typeof exports!=="undefined"){exports.loadCSS=loadCSS}else{w.loadCSS=loadCSS}}(typeof global!=="undefined"?global:this);
-    </script>
+    <script defer src="config.js"></script>
     
     <!-- 对非关键 JavaScript 使用 defer -->
     <script defer src="main.js"></script>
@@ -124,12 +118,6 @@
             </div>
         </main>
     </div>
-    <script src="config.js?v=" + new Date().getTime()></script>
-    <script>
-        // 添加动态版本号到其他资源
-        document.write('<link rel="stylesheet" href="styles.css?v=' + filterConfig.version + '">');
-        document.write('<script src="main.js?v=' + filterConfig.version + '"><\/script>');
-    </script>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
       // 从配置文件获取笔记文件路径
