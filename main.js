@@ -8,6 +8,13 @@ let currentPage = 1;
 const PAGE_SIZE = 20;
 let filteredMemos = [];
 
+// 在文件顶部添加缓存相关变量
+let memoCache = {
+    data: null,
+    etag: null,
+    timestamp: null
+};
+
 // 修改后的 getMemoTags 函数：如果未找到 .tag 节点，则直接通过正则表达式提取文本中的标签
 function getMemoTags(memo) {
     // 如果已经解析过标签，直接返回
@@ -383,34 +390,80 @@ function handleScroll() {
     }
 }
 
-// 修改 loadContent 函数
-function loadContent() {
+// 修改 loadContent 函数，添加缓存验证逻辑
+function loadContent(forceRefresh = false) {
     const refreshBtn = document.getElementById('refresh-btn');
     refreshBtn.classList.add('loading');
     
-    // 清空现有内容
+    // 清空现有内容显示加载状态
     document.getElementById('content').innerHTML = '<div class="loading">加载中...</div>';
     document.getElementById('tag-list').innerHTML = '<div class="loading">加载中...</div>';
     
-    // 添加时间戳参数以避免浏览器缓存
-    const timestamp = new Date().getTime();
-    fetch(`${filterConfig.notesFileUrl}?t=${timestamp}`)
+    // 准备请求头
+    const headers = new Headers();
+    if (!forceRefresh && memoCache.etag) {
+        headers.append('If-None-Match', memoCache.etag);
+    }
+    
+    // 构建请求URL，使用配置版本号而不是时间戳
+    const url = `${filterConfig.notesFileUrl}?v=${filterConfig.version}`;
+    
+    fetch(url, { headers })
         .then(response => {
+            // 保存新的 ETag
+            const newEtag = response.headers.get('ETag');
+            if (newEtag) {
+                memoCache.etag = newEtag;
+            }
+            
+            // 如果返回 304，使用缓存数据
+            if (response.status === 304 && memoCache.data) {
+                console.log('使用缓存数据');
+                return Promise.resolve(memoCache.data);
+            }
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+            
             return response.text();
         })
         .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
+            // 如果是新数据，更新缓存
+            if (typeof html === 'string') {
+                memoCache.data = html;
+                memoCache.timestamp = Date.now();
+            }
             
-            // 直接处理文档
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(
+                typeof html === 'string' ? html : memoCache.data, 
+                'text/html'
+            );
+            
             processHtmlDocument(doc);
             refreshBtn.classList.remove('loading');
         })
         .catch(error => {
             console.error('加载失败:', error);
+            // 如果有缓存数据，在加载失败时使用缓存
+            if (memoCache.data && !forceRefresh) {
+                console.log('加载失败，使用缓存数据');
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(memoCache.data, 'text/html');
+                processHtmlDocument(doc);
+                refreshBtn.classList.remove('loading');
+                
+                // 显示使用缓存的提示
+                const notification = document.createElement('div');
+                notification.className = 'cache-notification';
+                notification.innerHTML = '当前显示的是缓存数据';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+                return;
+            }
+            
+            // 完全没有数据时显示错误
             document.getElementById('content').innerHTML = `
                 <div style="color: #ff4444; padding: 20px; text-align: center;">
                     加载失败，请刷新页面重试<br>
@@ -490,12 +543,12 @@ function processHtmlDocument(doc) {
     renderPageOptimized(1, true);
 }
 
-// 修改刷新功能
+// 修改刷新功能，添加强制刷新参数
 function refreshContent() {
-    loadContent();
+    loadContent(true); // 强制刷新，忽略缓存
 }
 
-// 初始化页面
+// 修改初始化函数，添加自动刷新逻辑
 function init() {
     // 新增：调用SEO优化函数，根据配置文件更新页面的SEO相关meta信息
     updateSEOMetadata();
@@ -524,6 +577,25 @@ function init() {
     // 新增：监听页面滚动，实现分页加载
     window.addEventListener('scroll', handleScroll);
 
+    // 添加定期检查更新逻辑
+    setInterval(() => {
+        // 如果页面不可见或距离上次更新不足5分钟，跳过更新
+        if (document.hidden || 
+            (memoCache.timestamp && Date.now() - memoCache.timestamp < 5 * 60 * 1000)) {
+            return;
+        }
+        loadContent();
+    }, 5 * 60 * 1000); // 每5分钟检查一次更新
+    
+    // 页面可见性变化时检查更新
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && 
+            memoCache.timestamp && 
+            Date.now() - memoCache.timestamp > 5 * 60 * 1000) {
+            loadContent();
+        }
+    });
+    
     // 首次加载内容
     loadContent();
 }
