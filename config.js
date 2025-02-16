@@ -10,7 +10,7 @@ var filterConfig = {
     defaultTagFilter: "",
     
     // 笔记文件链接地址，通过配置管理链接
-    notesFileUrl: "flomo/memos.html",
+    notesFileUrl: "flomo/Chen的笔记.html",
     
     // 网站图标配置
     icons: {
