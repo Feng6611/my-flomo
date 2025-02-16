@@ -3,6 +3,11 @@ let allMemos = [];
 let tagStats = new Map();
 let activeTag = null;
 
+// 新增：分页相关变量
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let filteredMemos = [];
+
 // 修改后的 getMemoTags 函数：如果未找到 .tag 节点，则直接通过正则表达式提取文本中的标签
 function getMemoTags(memo) {
     // 先尝试查找 memo 内的 .tag 节点
@@ -22,6 +27,19 @@ function getMemoTags(memo) {
                 }
             }
         });
+    } else {
+        // 如果未找到 .tag 节点，则直接用正则表达式匹配 memo 文本中的标签
+        const regex = /#([^\s#]+)/g;
+        let match;
+        while (match = regex.exec(memo.textContent)) {
+            const tag = match[1].trim();
+            if (tag) {
+                tags.add(tag);
+                if (tag.includes('/')) {
+                    tags.add(tag.split('/')[0].trim());
+                }
+            }
+        }
     }
     return Array.from(tags);
 }
@@ -158,28 +176,22 @@ function renderTagList() {
 function filterMemosByTag(tag) {
     const content = document.getElementById('content');
     if (!tag) {
-        // 显示所有笔记
-        content.innerHTML = `<div class="memos">${allMemos.map(memo => memo.outerHTML).join('')}</div>`;
+        filteredMemos = [...allMemos];
     } else {
-        let filteredMemos;
         if (filterConfig && filterConfig.tagFilterMode === "exclude") {
-            // 反选：排除包含该 tag 的 memo
             filteredMemos = allMemos.filter(memo => {
                 const memoTags = getMemoTags(memo);
                 return !memoTags.includes(tag);
             });
         } else {
-            // 正选：仅包含该 tag 的 memo
             filteredMemos = allMemos.filter(memo => {
                 const memoTags = getMemoTags(memo);
                 return memoTags.includes(tag);
             });
         }
-        content.innerHTML = `<div class="memos">${filteredMemos.map(memo => memo.outerHTML).join('')}</div>`;
     }
-    processContent();
-    // 新增：每次筛选后重置内容区域滚动位置
-    content.scrollTop = 0;
+    renderPage(1, true);
+    document.getElementById('content').scrollTop = 0;
 }
 
 // 修改后的 processContent 函数：采用递归逐个替换文本节点中的 "#xxx" 为可点击的 <span class="tag"> 标签，
@@ -328,6 +340,36 @@ function updateSEOMetadata() {
     }
 }
 
+// 新增：分页渲染函数
+function renderPage(page, initialLoad = false) {
+    currentPage = page;
+    const startIndex = (page - 1) * PAGE_SIZE;
+    const endIndex = page * PAGE_SIZE;
+    // 逐步加载 filteredMemos 中的笔记
+    const memosToDisplay = filteredMemos.slice(0, endIndex);
+    
+    const contentEl = document.getElementById('content');
+    if (initialLoad) {
+        contentEl.innerHTML = `<div class="memos">${memosToDisplay.map(memo => memo.outerHTML).join('')}</div>`;
+    } else {
+        // 只追加当前页的新笔记
+        const memosContainer = contentEl.querySelector('.memos');
+        const newMemos = filteredMemos.slice(startIndex, endIndex);
+        memosContainer.innerHTML += newMemos.map(memo => memo.outerHTML).join('');
+    }
+    processContent();
+}
+
+// 新增：滚动事件处理，滚动到底部时加载下一页
+function handleScroll() {
+    const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+        if (currentPage * PAGE_SIZE < filteredMemos.length) {
+            renderPage(currentPage + 1);
+        }
+    }
+}
+
 // 加载内容
 function loadContent() {
     const refreshBtn = document.getElementById('refresh-btn');
@@ -403,18 +445,13 @@ function loadContent() {
                 }
             }
 
-            // 将笔记内容显示到页面
-            document.getElementById('content').innerHTML = `<div class="memos">${allMemos.map(memo => memo.outerHTML).join('')}</div>`;
-
-            // 调用 processContent 转换笔记内容，将纯文本中的标签转换为 <span class="tag"> 标签
-            processContent();
-
-            // 重新获取处理后的 memo 节点（现在包含 .tag 元素）
-            allMemos = Array.from(document.getElementById('content').querySelectorAll('.memo'));
-
-            // 更新标签统计和渲染标签列表
+            // 新增：更新标签统计，并渲染标签列表
             updateTagStats(allMemos);
             renderTagList();
+
+            // 用全部数据初始化分页显示
+            filteredMemos = [...allMemos];
+            renderPage(1, true);
             
             refreshBtn.classList.remove('loading');
         })
@@ -465,6 +502,9 @@ function init() {
             });
         }
     });
+
+    // 新增：监听页面滚动，实现分页加载
+    window.addEventListener('scroll', handleScroll);
 
     // 首次加载内容
     loadContent();
