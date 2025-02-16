@@ -544,36 +544,3 @@ header .top .user .date {
         margin: 8px 0;
     }
 }
-
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --primary-light: rgba(60, 163, 112, 0.1);
-        --text-primary: #e0e0e0;
-        --text-secondary: #a0a0a0;
-        --text-light: #808080;
-    }
-    
-    body {
-        background: #1a1a1a;
-    }
-    
-    header {
-        background: #242424;
-        border-bottom-color: #333;
-    }
-    
-    .memo {
-        background: #242424;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    
-    .action-button {
-        background: #333;
-        color: #e0e0e0;
-    }
-    
-    .action-button:hover {
-        background: #404040;
-    }
-}
