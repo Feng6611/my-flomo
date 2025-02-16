@@ -61,13 +61,12 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-base) 0;
-    margin-left: 10px;  /* 增加左侧边距 */
 }
 
 .header-top .title {
     font-size: 24px;
     color: var(--text-primary);
-    font-weight: 600;  /* 稍微加粗一点 */
+    font-weight: 600;
     letter-spacing: 0.5px;
 }
 
