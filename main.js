@@ -390,157 +390,62 @@ function handleScroll() {
     }
 }
 
-// 修改 loadContent 函数，添加缓存验证逻辑
-function loadContent(forceRefresh = false) {
+// 合并加载逻辑，统一使用 loadContent 函数
+async function loadContent(forceRefresh = false) {
     const refreshBtn = document.getElementById('refresh-btn');
     refreshBtn.classList.add('loading');
     
-    // 清空现有内容显示加载状态
-    document.getElementById('content').innerHTML = '<div class="loading">加载中...</div>';
-    document.getElementById('tag-list').innerHTML = '<div class="loading">加载中...</div>';
-    
-    // 准备请求头
-    const headers = new Headers();
-    if (!forceRefresh && memoCache.etag) {
-        headers.append('If-None-Match', memoCache.etag);
-    }
-    
-    // 构建请求URL，使用配置版本号而不是时间戳
-    const url = `${filterConfig.notesFileUrl}?v=${filterConfig.version}`;
-    
-    fetch(url, { headers })
-        .then(response => {
-            // 保存新的 ETag
-            const newEtag = response.headers.get('ETag');
-            if (newEtag) {
-                memoCache.etag = newEtag;
-            }
-            
-            // 如果返回 304，使用缓存数据
-            if (response.status === 304 && memoCache.data) {
-                console.log('使用缓存数据');
-                return Promise.resolve(memoCache.data);
-            }
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return response.text();
-        })
-        .then(html => {
-            // 如果是新数据，更新缓存
-            if (typeof html === 'string') {
-                memoCache.data = html;
-                memoCache.timestamp = Date.now();
-            }
-            
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(
-                typeof html === 'string' ? html : memoCache.data, 
-                'text/html'
-            );
-            
-            processHtmlDocument(doc);
-            refreshBtn.classList.remove('loading');
-        })
-        .catch(error => {
-            console.error('加载失败:', error);
-            // 如果有缓存数据，在加载失败时使用缓存
-            if (memoCache.data && !forceRefresh) {
-                console.log('加载失败，使用缓存数据');
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(memoCache.data, 'text/html');
-                processHtmlDocument(doc);
-                refreshBtn.classList.remove('loading');
-                
-                // 显示使用缓存的提示
-                const notification = document.createElement('div');
-                notification.className = 'cache-notification';
-                notification.innerHTML = '当前显示的是缓存数据';
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 3000);
-                return;
-            }
-            
-            // 完全没有数据时显示错误
-            document.getElementById('content').innerHTML = `
-                <div style="color: #ff4444; padding: 20px; text-align: center;">
-                    加载失败，请刷新页面重试<br>
-                    <small style="color: #666;">${error.message}</small>
-                </div>
-            `;
-            document.getElementById('tag-list').innerHTML = `
-                <div style="color: #ff4444; padding: 20px; text-align: center;">
-                    加载失败
-                </div>
-            `;
-            refreshBtn.classList.remove('loading');
+    try {
+        const response = await fetch(filterConfig.notesFileUrl + `?v=${filterConfig.version}`, {
+            headers: !forceRefresh && memoCache.etag ? { 'If-None-Match': memoCache.etag } : {}
         });
+        
+        // 处理 ETag
+        const newEtag = response.headers.get('ETag');
+        if (newEtag) {
+            memoCache.etag = newEtag;
+        }
+        
+        // 使用缓存或获取新数据
+        const htmlText = response.status === 304 && memoCache.data 
+            ? memoCache.data 
+            : await response.text();
+            
+        // 更新缓存
+        if (typeof htmlText === 'string') {
+            memoCache.data = htmlText;
+            memoCache.timestamp = Date.now();
+        }
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        
+        // 更新用户信息
+        updateUserInfo(doc);
+        
+        // 处理笔记内容
+        processHtmlDocument(doc);
+        
+    } catch (error) {
+        console.error('加载失败:', error);
+        handleLoadError(error);
+    } finally {
+        refreshBtn.classList.remove('loading');
+    }
 }
 
-// 新增：处理 HTML 文档的函数
-function processHtmlDocument(doc) {
-    const memosContainer = doc.querySelector('.memos');
-    if (!memosContainer) {
-        throw new Error('未找到笔记内容');
-    }
-
-    // 使用字符串模板存储HTML，避免频繁的DOM操作
-    let memosHTML = '';
-    
-    // 一次遍历处理所有数据，避免多次循环
-    allMemos = Array.from(memosContainer.querySelectorAll('.memo'))
-        .map(memo => {
-            // 1. 提取所有需要的数据
-            const timeElem = memo.querySelector('.time');
-            const memoDate = timeElem ? new Date(timeElem.textContent.trim().match(/\d{4}-\d{1,2}-\d{1,2}/)?.[0] || 0) : null;
-            const tags = getMemoTags(memo);
-            const content = memo.querySelector('.content').innerHTML;
-            
-            // 2. 处理图片路径
-            const processedContent = content.replace(/src="file\//g, 'src="flomo/file/');
-            
-            // 3. 构建优化后的HTML字符串
-            const memoHTML = `
-                <div class="memo" data-date="${memoDate ? memoDate.getTime() : '0'}" data-tags='${JSON.stringify(tags)}'>
-                    <div class="time">${timeElem ? timeElem.textContent : ''}</div>
-                    <div class="content">${processedContent}</div>
-                    <div class="files">${memo.querySelector('.files')?.innerHTML || ''}</div>
-                </div>
-            `;
-            
-            // 4. 累加到总HTML字符串
-            memosHTML += memoHTML;
-            
-            return {
-                html: memoHTML,
-                date: memoDate,
-                tags: tags
-            };
-        })
-        // 5. 日期筛选
-        .filter(({date}) => {
-            if (!filterConfig.minDate) return true;
-            const minDate = new Date(filterConfig.minDate);
-            return !date || date >= minDate;
-        })
-        // 6. 标签预过滤
-        .filter(({tags}) => {
-            if (!filterConfig.defaultTagFilter) return true;
-            const hasTag = tags.includes(filterConfig.defaultTagFilter);
-            return filterConfig.tagFilterMode === "exclude" ? !hasTag : hasTag;
+// 更新用户信息的函数
+function updateUserInfo(doc) {
+    const userContainer = doc.querySelector('.user');
+    if (userContainer) {
+        const name = userContainer.querySelector('.name')?.innerText || '';
+        const date = userContainer.querySelector('.date')?.innerText || '';
+        
+        document.querySelectorAll('.user').forEach(container => {
+            container.querySelector('.name')?.innerText = name;
+            container.querySelector('.date')?.innerText = date;
         });
-
-    // 7. 更新标签统计
-    updateTagStats(allMemos.map(memo => memo.tags));
-    
-    // 8. 渲染标签列表
-    renderTagList();
-
-    // 9. 初始化分页显示，使用HTML字符串而不是DOM元素
-    filteredMemos = allMemos.map(memo => memo.html);
-    renderPageOptimized(1, true);
+    }
 }
 
 // 修改刷新功能，添加强制刷新参数
@@ -595,10 +500,10 @@ function init() {
             loadContent();
         }
     });
-    
-    // 首次加载内容
-    loadContent();
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', init); 
+// 简化初始化逻辑
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    loadContent();
+}); 
