@@ -27,11 +27,5 @@ var filterConfig = {
     },
     
     // 添加版本控制
-    version: new Date().getTime(), // 使用时间戳作为版本号，确保每次部署都会更新
-    
-    // 缓存控制
-    cacheControl: {
-        enabled: true,  // 是否启用缓存控制
-        maxAge: 0      // 缓存时间（秒）
-    }
+    version: new Date().getTime() // 使用时间戳作为版本号，确保每次部署都会更新
 }; 
