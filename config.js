@@ -21,5 +21,5 @@ var filterConfig = {
         canonicalUrl:"openflomo.kkuk.dev"
     },
 
-    version: "1.0.0" // 使用固定的版本号或构建时间，而不是每次都生成新的时间戳
+    version:new Date().getTime()  // 版本控制，使用时间戳
 }; 

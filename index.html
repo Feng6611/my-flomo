@@ -61,7 +61,7 @@
     </noscript>
     
     <!-- 预加载配置文件 -->
-    <link rel="preload" href="config.js?v=${filterConfig.version}" as="script">
+    <link rel="preload" href="config.js" as="script">
     
     <!-- 添加loadCSS polyfill -->
     <script>
@@ -71,7 +71,7 @@
     </script>
     
     <!-- 对非关键 JavaScript 使用 defer -->
-    <script defer src="main.js?v=${filterConfig.version}"></script>
+    <script defer src="main.js"></script>
     
     <!-- 在head中添加 -->
     <link rel="preconnect" href="https://flomoapp.com">
@@ -124,7 +124,12 @@
             </div>
         </main>
     </div>
-    <script src="config.js?v=${filterConfig.version}"></script>
+    <script src="config.js?v=" + new Date().getTime()></script>
+    <script>
+        // 添加动态版本号到其他资源
+        document.write('<link rel="stylesheet" href="styles.css?v=' + filterConfig.version + '">');
+        document.write('<script src="main.js?v=' + filterConfig.version + '"><\/script>');
+    </script>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
       // 从配置文件获取笔记文件路径

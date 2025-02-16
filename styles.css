@@ -257,6 +257,7 @@ header .top .user .date {
     background-color: var(--primary-light);
     color: var(--primary-color);
     font-weight: 500;
+    border-left: 3px solid var(--primary-color); /* 新增左侧边框 */
 }
 
 .tag-item .count {
