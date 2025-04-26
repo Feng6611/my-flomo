@@ -8,7 +8,7 @@
     "minify:js": "uglifyjs main.js -o dist/main.min.js -c -m",
     "copy:html": "cpy index.html dist",
     "copy:config": "cpy config.js dist",
-    "copy:assets": "cpy assets/** dist/assets",
+    "copy:assets": "cpy 'assets/**/*' dist/assets",
     "copy:rootfiles": "cpy CNAME LICENSE robots.txt sitemap.xml dist",
     "build": "npm run clean && mkdir -p dist && npm run minify:css && npm run minify:js && npm run copy:html && npm run copy:config && npm run copy:assets && npm run copy:rootfiles"
   },
