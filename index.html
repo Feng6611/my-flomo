@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open your flomo</title>
+    <meta name="description" content="kkuk的 flomo 公开展示页面">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flomo.kkuk.dev"> <!-- 请替换成你的实际网站 URL -->
+    <meta property="og:title" content="Open your flomo">
+    <meta property="og:description" content="kkuk的 flomo 公开展示页面">
+    <!-- <meta property="og:image" content="预览图片的URL"> --> <!-- 如果有预览图，取消注释并替换 URL -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image"> <!-- 或者 "summary" 如果没有大图 -->
+    <meta property="twitter:url" content="https://flomo.kkuk.dev"> <!-- 请替换成你的实际网站 URL -->
+    <meta property="twitter:title" content="Open your flomo">
+    <meta property="twitter:description" content="kkuk的 flomo 公开展示页面">
+    <!-- <meta property="twitter:image" content="预览图片的URL"> --> <!-- 如果有预览图，取消注释并替换 URL -->
     
+    <link rel="canonical" href="https://flomo.kkuk.dev">
+
     <!-- 内联关键CSS -->
     <style>
         /* 关键渲染路径所需的最小CSS集合 */
@@ -55,27 +72,36 @@
     </style>
     
     <!-- 异步加载非关键CSS -->
-    <link rel="preload" href="styles.css?v=${filterConfig.version}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="styles.min.css?v=1.0.0" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="styles.css?v=${filterConfig.version}">
+        <link rel="stylesheet" href="styles.min.css?v=1.0.0">
     </noscript>
     
     <!-- 预加载并加载配置文件 -->
-    <link rel="preload" href="config.js" as="script">
-    <script defer src="config.js"></script>
+    <link rel="preload" href="config.js?v=1.0.0" as="script">
+    <script defer src="config.js?v=1.0.0"></script>
     
     <!-- 对非关键 JavaScript 使用 defer -->
-    <script defer src="main.js"></script>
+    <script defer src="main.min.js?v=1.0.0"></script>
     
     <!-- 在head中添加 -->
     <link rel="preconnect" href="https://flomoapp.com">
     <link rel="dns-prefetch" href="https://flomoapp.com">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://flomo.kkuk.dev",
+      "name": "Open your flomo"
+    }
+    </script>
 </head>
 <body>
     <header>
         <div class="header-container">
             <div class="header-top">
-                <div class="title">Open your flomo</div>
+                <h1 class="title">Open your flomo</h1>
                 <div class="user">
                     <div class="name"></div>
                     <div class="date"></div>
@@ -89,11 +115,11 @@
                         </svg>
                         刷新内容
                     </button>
-                    <a href="https://flomoapp.com" target="_blank" class="action-button">
+                    <a href="https://openflomo.kkuk.devcom" target="_blank" class="action-button">
                         <svg viewBox="0 0 24 24" width="18" height="18">
                             <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z"/>
                         </svg>
-                        flomo
+                        openflomo
                     </a>
                      <a href="https://github.com/Feng6611/open-flomo" target="_blank" class="action-button">
                         <svg viewBox="0 0 24 24" width="18" height="18">

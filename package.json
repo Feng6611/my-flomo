@@ -1,0 +1,14 @@
+{
+  "name": "open-flomo-page",
+  "version": "1.0.0",
+  "description": "Flomo public display page",
+  "scripts": {
+    "minify:css": "csso styles.css -o styles.min.css",
+    "minify:js": "uglifyjs main.js -o main.min.js -c -m",
+    "build": "npm run minify:css && npm run minify:js"
+  },
+  "devDependencies": {
+    "csso-cli": "^4.0.2",
+    "uglify-js": "^3.17.4"
+  }
+} 

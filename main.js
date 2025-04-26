@@ -497,15 +497,15 @@ function processHtmlDocument(doc) {
             const memoDate = timeElem ? new Date(timeElem.textContent.trim().match(/\d{4}-\d{1,2}-\d{1,2}/)?.[0] || 0) : null;
             const tags = getMemoTags(memo);
             const content = memo.querySelector('.content').innerHTML;
-            
-            // 2. 处理图片路径
-            const processedContent = content.replace(/src="file\//g, 'src="flomo/file/');
-            
-            // 3. 构建优化后的HTML字符串
+
+            // 2. 处理图片路径 (注释掉这行，不再修改图片路径)
+            // const processedContent = content.replace(/src="file\//g, 'src="flomo/file/');
+
+            // 3. 构建优化后的HTML字符串 (使用原始 content)
             const memoHTML = `
                 <div class="memo" data-date="${memoDate ? memoDate.getTime() : '0'}" data-tags='${JSON.stringify(tags)}'>
                     <div class="time">${timeElem ? timeElem.textContent : ''}</div>
-                    <div class="content">${processedContent}</div>
+                    <div class="content">${content}</div>
                     <div class="files">${memo.querySelector('.files')?.innerHTML || ''}</div>
                 </div>
             `;
