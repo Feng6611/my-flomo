@@ -3,12 +3,19 @@
   "version": "1.0.0",
   "description": "Flomo public display page",
   "scripts": {
-    "minify:css": "csso styles.css -o styles.min.css",
-    "minify:js": "uglifyjs main.js -o main.min.js -c -m",
-    "build": "npm run minify:css && npm run minify:js"
+    "clean": "rimraf dist",
+    "minify:css": "csso styles.css -o dist/styles.min.css",
+    "minify:js": "uglifyjs main.js -o dist/main.min.js -c -m",
+    "copy:html": "cpy index.html dist",
+    "copy:config": "cpy config.js dist",
+    "copy:assets": "cpy assets/** dist/assets",
+    "copy:rootfiles": "cpy CNAME LICENSE robots.txt sitemap.xml dist",
+    "build": "npm run clean && mkdir -p dist && npm run minify:css && npm run minify:js && npm run copy:html && npm run copy:config && npm run copy:assets && npm run copy:rootfiles"
   },
   "devDependencies": {
     "csso-cli": "^4.0.2",
-    "uglify-js": "^3.17.4"
+    "uglify-js": "^3.17.4",
+    "cpy-cli": "^5.0.0",
+    "rimraf": "^5.0.7"
   }
 } 
